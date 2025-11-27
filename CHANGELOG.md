@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- 2025-11-27: chore(ci): fix feature push workflow
+
 - 2025-11-26: docs: new
 
 - 2025-11-26: docs: new
