@@ -1,0 +1,257 @@
+version: "3"
+
+dotenv: [".env"]
+vars:
+  VENV: ".venv"
+  PYTHON: "python3"
+
+tasks:
+
+  _check_venv:
+    internal: true
+    silent: true
+    cmds:
+      - |
+        if [ ! -d "{{.VENV}}" ]; then
+          echo ".venv not found. Run: make env"
+          exit 1
+        fi
+
+  lint:
+    desc: "Run black, isort, and flake8"
+    deps: [_check_venv]
+    cmds:
+      - '{{.VENV}}/bin/black src tests'
+      - '{{.VENV}}/bin/isort src tests'
+      - '{{.VENV}}/bin/flake8 src tests'
+
+  lint:check:
+    desc: "Validate formatting (no changes)"
+    deps: [_check_venv]
+    cmds:
+      - '{{.VENV}}/bin/black --check src tests'
+      - '{{.VENV}}/bin/isort --check-only src tests'
+      - '{{.VENV}}/bin/flake8 src tests'
+
+  tests:
+    deps: [_check_venv]
+    cmds:
+      - '{{.VENV}}/bin/pytest -q'
+
+  check:clean:
+    internal: true
+    silent: true
+    desc: "Fail if working tree is not clean"
+    cmds:
+      - |
+        echo "==> Checking working tree..."
+        if ! git diff --quiet || ! git diff --cached --quiet; then
+          echo "Working tree not clean. Commit or stash first."
+          exit 1
+        fi
+
+  check:not-ci:
+    cmds:
+      - |
+        if [ "${CI:-}" != "" ]; then
+          echo "ERROR: This task must not run in CI."
+          exit 1
+        fi
+
+  # ============================================================
+  # Feature Branch Workflow (Developers)
+  # ============================================================
+
+  feature:start:
+    desc: "Sync main and create a new feature branch"
+    deps: [check:not-ci, check:clean]
+    cmds:
+      - |
+        if [ -z "{{.CLI_ARGS}}" ]; then
+          echo "Usage: task feature:start <branch-name>"
+          exit 1
+        fi
+
+        BRANCH="{{.CLI_ARGS}}"
+
+        # Auto-prefix "feature/" if missing
+        if ! echo "$BRANCH" | grep -Eq '^feature/'; then
+          BRANCH="feature/$BRANCH"
+        fi
+
+        echo "==> Updating main"
+        git checkout main
+        git pull --rebase
+
+        echo "==> Creating branch '$BRANCH'"
+        git checkout -b "$BRANCH"
+
+        echo "Branch '$BRANCH' created and ready."
+
+  commit:
+    desc: "Lint Check, test, update CHANGELOG, and commit staged changes (Conventional Commit format)"
+    vars:
+      MSG:
+        sh: 'echo ${MSG:-}'
+    cmds:
+
+      # 1) Ensure message is provided
+      - |
+        if [ -z "{{.MSG}}" ]; then
+          echo "Usage: task commit MSG='feat: add MPC diagnostics'"
+          exit 1
+        fi
+
+      # 2) Enforce Conventional Commits
+      - |
+        if ! echo "{{.MSG}}" | grep -Eq '^(feat|fix|docs|style|refactor|perf|test|chore)(\([a-zA-Z0-9_-]+\))?: .+'; then
+          echo "ERROR: Commit message must follow Conventional Commits, e.g.:"
+          echo "  feat: add MPC diagnostics"
+          echo "  fix(scope): correct MPC logic"
+          echo "  docs: update README"
+          exit 1
+        fi
+
+      # 3) Do NOT allow committing on main
+      - |
+        BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+        if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; then
+          echo "ERROR: You are on '$BRANCH'. Commit only on feature branches."
+          exit 1
+        fi
+        echo "==> Current branch: $BRANCH"
+
+      # 4) Ensure something is staged (no git add . here)
+      - |
+        if git diff --cached --quiet; then
+          echo "ERROR: No staged files detected."
+          echo "Stage files manually using:"
+          echo "  git add <file1> <file2> ..."
+          exit 1
+        fi
+        echo "==> Staged files detected"
+
+      # 6) Lint (flake8)
+      - task lint:check
+
+      # 7) Run tests
+      - task tests
+
+      # 8) Update CHANGELOG under [Unreleased]
+      - |
+        echo "==> Updating CHANGELOG.md"
+        if [ ! -f CHANGELOG.md ]; then
+          echo "# Changelog" > CHANGELOG.md
+          echo >> CHANGELOG.md
+          echo "## [Unreleased]" >> CHANGELOG.md
+          echo >> CHANGELOG.md
+        fi
+
+        # Ensure [Unreleased] section exists in existing changelog
+        if ! grep -q '^## \[Unreleased\]' CHANGELOG.md; then
+          echo "ERROR: '## [Unreleased]' section missing in CHANGELOG.md."
+          echo "Add it back manually before committing."
+          exit 1
+        fi
+
+        DATE="$(date +%Y-%m-%d)"
+        awk -v msg="- ${DATE}: {{.MSG}}" '
+          /^## \[Unreleased\]/ && !seen++ { print; print ""; print msg; next }
+          { print }
+        ' CHANGELOG.md > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
+
+        git add CHANGELOG.md
+
+      # 9) Commit ONLY staged changes
+      - |
+        echo "==> Committing staged changes"
+        git commit -m "{{.MSG}}"
+        echo
+        echo "Committed on '$BRANCH' with message:"
+        echo "  {{.MSG}}"
+
+  feature:push:
+    desc: "Run tests, rebase current branch on main, then push"
+    deps: [check:not-ci, check:clean]
+    cmds:
+      - |
+        BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+        if [ "$BRANCH" = "main" ]; then
+          echo "You are on main. Switch to a feature branch."
+          exit 1
+        fi
+        echo "==> Using feature branch: $BRANCH"
+
+      - echo "==> Running tests (pre-rebase)"
+      - task tests
+
+      - |
+        echo "==> Updating main"
+        git checkout main
+        git pull --rebase
+
+        echo "==> Rebasing $BRANCH onto main"
+        git checkout "$BRANCH"
+        git rebase main
+
+      - task tests
+
+      - |
+        echo "==> Pushing branch"
+        git push --force-with-lease -u origin "$BRANCH"
+
+        echo "Feature branch pushed and ready for MR."
+
+  # ============================================================
+  # Docs
+  # ============================================================
+
+  docs:build:
+    desc: "Build Sphinx docs"
+    deps: [_check_venv]
+    cmds:
+      - |
+        if ! command -v sphinx-build >/dev/null; then
+          echo "sphinx-build not found. Install docs dependencies."
+          exit 1
+        fi
+      - '{{.VENV}}/bin/sphinx-build -b html docs/source docs/_build/html'
+
+  docs:serve:
+    desc: "Serve built documentation"
+    cmds:
+      - |
+        if [ ! -d docs/_build/html ]; then
+          echo "Docs not built. Run: task docs:build"
+          exit 1
+        fi
+      - echo "Serving docs at http://localhost:8000"
+      - cd docs/_build/html && python3 -m http.server 8000
+
+  docs:clean:
+    desc: "Clean built docs"
+    cmds:
+      - rm -rf docs/_build/*
+      - rm -rf docs/source/api/*
+
+  # ============================================================
+  # Environment & Dev Utilities
+  # ============================================================
+  dev:env-create:
+    desc: "Create virtualenv"
+    cmds:
+      - '{{.PYTHON}} -m venv {{.VENV}}'
+      - '{{.VENV}}/bin/pip install -U pip'
+
+  dev:env-export:
+    desc: "Export environment for developer to requirements-lock.txt"
+    deps: [_check_venv]
+    cmds:
+      - '{{.VENV}}/bin/pip freeze > requirements-lock.txt'
+      - echo "Exported to requirements-lock.txt"
+
+  dev:env-install:
+    desc: "Install project with all dev & docs tools"
+    deps: [dev:env-create, _check_venv]
+    cmds:
+      - '{{.VENV}}/bin/pip install -e ".[dev,docs]"'

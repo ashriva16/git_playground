@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "git_playbook"
+version = "1.0.0"
+description = "git playbook"
+authors = [
+  { name="Ankit Shrivastava"}
+]
+keywords = [""]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License"
+]
+dependencies = [] # Add your pip package dependencies here
+
+[project.optional-dependencies]
+docs = [
+  "sphinx",
+  "sphinx-rtd-theme",
+  "nbsphinx",
+  "myst-parser",
+  "sphinx-last-updated-by-git"
+]
+dev = [
+  "pytest>=6.0",
+  "pytest-cov>=2.0",
+  "pytest-benchmark>=3.4.1",
+  "black",
+  "flake8",
+  "isort"
+]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-v --cov=src --cov-report=term-missing"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::UserWarning",
+]
+[tool.setuptools]
+package-dir = {"" = "."}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.pylint.'MASTER']
+init-hook='import sys; sys.path.insert(0, "src")'
