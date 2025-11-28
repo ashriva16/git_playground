@@ -1,4 +1,4 @@
-Welcome to CESER Documentation
+Welcome to Documentation
 ========================================================
 
 Introduction
