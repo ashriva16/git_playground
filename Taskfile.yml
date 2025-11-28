@@ -176,16 +176,16 @@ tasks:
     cmds:
       - |
         BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-        if [ "$BRANCH" = "main" ]; then
-          echo "You are on main. Switch to a feature branch."
+        if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; then
+          echo "ERROR: You are on $BRANCH. Switch to a feature branch."
           exit 1
         fi
+
         echo "==> Using feature branch: $BRANCH"
 
-      - echo "==> Running tests (pre-rebase)"
-      - task tests
+        echo "==> Running tests (pre-rebase)"
+        task tests
 
-      - |
         echo "==> Updating main"
         git checkout main
         git pull --rebase
@@ -194,13 +194,13 @@ tasks:
         git checkout "$BRANCH"
         git rebase main
 
-      - task tests
+        echo "==> Running tests (post-rebase)"
+        task tests
 
-      - |
-        echo "==> Pushing branch"
+        echo "==> Pushing branch $BRANCH"
         git push --force-with-lease -u origin "$BRANCH"
 
-        echo "Feature branch pushed and ready for MR."
+        echo "Feature branch '$BRANCH' pushed and ready for MR."
 
   # ============================================================
   # Docs

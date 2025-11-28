@@ -1,0 +1,9 @@
+{%- set shortname = basename | replace('scripts.', '') %}
+
+{{ shortname }}
+{{ '=' * (shortname|length) }}
+
+.. automodule:: {{ qualname }}
+   :members:
+   :undoc-members:
+   :show-inheritance:
