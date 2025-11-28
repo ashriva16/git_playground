@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- 2025-11-28: chore: adding pylint
+
 - 2025-11-27: chore: Adding documentation functionality
 
 - 2025-11-27: chore(ci): fix feature push workflow
