@@ -30,7 +30,8 @@ dev = [
   "pytest-benchmark>=3.4.1",
   "black",
   "flake8",
-  "isort"
+  "isort",
+  "pylint"
 ]
 
 [tool.pytest.ini_options]

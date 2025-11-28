@@ -24,6 +24,7 @@ tasks:
       - '{{.VENV}}/bin/black src tests'
       - '{{.VENV}}/bin/isort src tests'
       - '{{.VENV}}/bin/flake8 src tests'
+      - '{{.VENV}}/bin/pylint src tests'
 
   lint:check:
     desc: "Validate formatting (no changes)"
@@ -32,6 +33,7 @@ tasks:
       - '{{.VENV}}/bin/black --check src tests'
       - '{{.VENV}}/bin/isort --check-only src tests'
       - '{{.VENV}}/bin/flake8 src tests'
+      - '{{.VENV}}/bin/pylint src tests  || true'
 
   tests:
     deps: [_check_venv]
@@ -105,10 +107,30 @@ tasks:
       # 2) Enforce Conventional Commits
       - |
         if ! echo "{{.MSG}}" | grep -Eq '^(feat|fix|docs|style|refactor|perf|test|chore)(\([a-zA-Z0-9_-]+\))?: .+'; then
-          echo "ERROR: Commit message must follow Conventional Commits, e.g.:"
-          echo "  feat: add MPC diagnostics"
-          echo "  fix(scope): correct MPC logic"
-          echo "  docs: update README"
+          echo "ERROR: Commit message must follow Conventional Commits."
+          echo ""
+          echo "Allowed types:"
+          echo "  feat, fix, docs, style, refactor, perf, test, chore"
+          echo ""
+          echo "Example formats:"
+          echo "  feat: add new capability"
+          echo "  feat(scope): introduce feature in <scope>"
+          echo "  fix: correct incorrect behavior"
+          echo "  fix(scope): resolve issue in <scope>"
+          echo "  docs: update documentation"
+          echo "  docs(scope): modify docs in <scope>"
+          echo "  style: reformat code (no logic change)"
+          echo "  style(scope): adjust formatting in <scope>"
+          echo "  refactor: improve code structure (same behavior)"
+          echo "  refactor(scope): reorganize code in <scope>"
+          echo "  perf: improve performance"
+          echo "  perf(scope): optimize behavior in <scope>"
+          echo "  test: update or add tests"
+          echo "  test(scope): modify tests in <scope>"
+          echo "  chore: update build or tooling"
+          echo "  chore(scope): modify CI/scripts/config"
+          echo ""
+          echo "Usage: task commit MSG='feat: add <something>'"
           exit 1
         fi
 
