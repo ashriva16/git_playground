@@ -99,9 +99,32 @@ def setup(app):
     app.connect("autodoc-skip-member", skip)
 
 
+# -----------------------------------------------------------------------------
+# Version from VERSION file
+# -----------------------------------------------------------------------------
+VERSION_FILE = os.path.join(PROJECT_ROOT, "VERSION")
+if os.path.exists(VERSION_FILE):
+    with open(VERSION_FILE) as f:
+        release = f.read().strip()
+else:
+    release = "0.0.0"  # fallback if VERSION missing
+
+# Short version (major.minor)
+version = ".".join(release.split(".")[:2])
+
+# html_context = {
+#   'current_version' : "1.0",
+#   'versions' : [["1.0", "link to 1.0"], ["2.0", "link to 2.0"]],
+#   'current_language': 'en',
+#   'languages': [["en", "link to en"], ["de", "link to de"]]
+# }
+
+
 html_context = {
-  'current_version' : "1.0",
-  'versions' : [["1.0", "link to 1.0"], ["2.0", "link to 2.0"]],
-  'current_language': 'en',
-  'languages': [["en", "link to en"], ["de", "link to de"]]
+    "current_version": release,
+    "versions": [
+        # Fill this dynamically via gh-pages if you want,
+        # or keep static list for now
+        [release, f"https://your-site-url/{release}/"],
+    ],
 }
