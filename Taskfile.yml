@@ -301,7 +301,7 @@ tasks:
       #   fi
 
       # 2) Update local main
-      - git pull --rebase
+      # - git pull --rebase
 
       # 3) Update VERSION file
       - echo "{{.NEW_VERSION}}" > VERSION
