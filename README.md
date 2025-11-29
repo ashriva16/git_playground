@@ -16,6 +16,9 @@
   <a href="https://github.com/ashriva16/mlops_playground/actions/workflows/ci.yml">
     <img alt="CI" src="https://github.com/ashriva16/mlops_playground/actions/workflows/ci.yml/badge.svg" />
   </a>
+  <a href="https://github.com/ashriva16/mlops_playground/actions/workflows/doc.yml">
+    <img alt="CI" src="https://github.com/ashriva16/mlops_playground/actions/workflows/doc.yml/badge.svg" />
+  </a>
 </p>
 
 
