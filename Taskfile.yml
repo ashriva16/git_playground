@@ -293,15 +293,15 @@ tasks:
         fi
 
       # # 1) Ensure we are on main
-      # - |
-      #   BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-      #   if [ "$BRANCH" != "main" ]; then
-      #     echo "ERROR: release:cut must be run on main, currently on '$BRANCH'"
-      #     exit 1
-      #   fi
+      - |
+        BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+        if [ "$BRANCH" != "main" ]; then
+          echo "ERROR: release:cut must be run on main, currently on '$BRANCH'"
+          exit 1
+        fi
 
       # 2) Update local main
-      # - git pull --rebase
+      - git pull --rebase
 
       # 3) Update VERSION file
       - echo "{{.NEW_VERSION}}" > VERSION
@@ -366,7 +366,7 @@ tasks:
         before = text[: m.start()]
 
         new_unreleased = "## [Unreleased]\\n\\n"
-        new_section = f"## [{new_version}] - {today}\\n{body}\\n\\n"
+        new_section = f"## [{new_version}] - {today}\\n\n{body}\\n\\n"
 
         new_text = before + new_unreleased + new_section + (rest.lstrip("\\n") if rest else "")
 
@@ -380,5 +380,5 @@ tasks:
 
       # 7) Tag and push
       - git tag -a "v{{.NEW_VERSION}}" -m "Release v{{.NEW_VERSION}}"
-      # - git push
-      # - git push origin "v{{.NEW_VERSION}}"
+      - git push
+      - git push origin "v{{.NEW_VERSION}}"
