@@ -13,7 +13,9 @@
   <a href="https://github.com/ashriva16/mlops_playground/pulls">
     <img alt="Pull Requests" src="https://img.shields.io/github/issues-pr/ashriva16/mlops_playground" />
   </a>
-  [![CI](https://github.com/ashriva16/mlops_playground/actions/workflows/ci.yml/badge.svg)](https://github.com/ashriva16/mlops_playground/actions/workflows/ci.yml)
+  <a href="https://github.com/ashriva16/mlops_playground/actions/workflows/ci.yml">
+    <img alt="CI" src="https://github.com/ashriva16/mlops_playground/actions/workflows/ci.yml/badge.svg" />
+  </a>
 </p>
 
 
