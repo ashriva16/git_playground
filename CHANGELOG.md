@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- 2025-11-29: feat: add main.py file
+
 ## [1.1.0] - 2025-11-29
 
 - 2025-11-28: docs: cleaning

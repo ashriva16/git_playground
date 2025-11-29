@@ -110,7 +110,7 @@ git checkout vX.Y.Z
 - **Usage**
 
     ```sh
-    .venv/bin/python -m playground.example
+    .venv/bin/python main.py
     ```
 
 ## 🤝 Contributing
