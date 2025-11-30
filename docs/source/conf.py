@@ -37,13 +37,13 @@ autodoc_member_order = "groupwise"
 # Sphinx extensions
 # -----------------------------------------------------------------------------
 extensions = [
-    "nbsphinx",                   # Jupyter notebook support
-    "myst_parser",                # Markdown support
+    "nbsphinx",  # Jupyter notebook support
+    "myst_parser",  # Markdown support
     "sphinx.ext.mathjax",
-    "sphinx.ext.autodoc",         # Python API auto-documentation
-    "sphinx.ext.autosummary",     # Auto-generates summary tables
-    "sphinx.ext.napoleon",        # Google / NumPy docstring style
-    "sphinx.ext.viewcode",        # Link to source code
+    "sphinx.ext.autodoc",  # Python API auto-documentation
+    "sphinx.ext.autosummary",  # Auto-generates summary tables
+    "sphinx.ext.napoleon",  # Google / NumPy docstring style
+    "sphinx.ext.viewcode",  # Link to source code
     "sphinx_last_updated_by_git",
     "sphinx.ext.inheritance_diagram",
 ]
@@ -67,7 +67,7 @@ html_last_updated_fmt = "%b %d, %Y"
 # Autodoc behavior
 # -----------------------------------------------------------------------------
 # Move type hints out of function signatures
-autodoc_typehints = "description"     # or "none"
+autodoc_typehints = "description"  # or "none"
 
 # Allow short signatures from the first docstring line
 autodoc_docstring_signature = True
@@ -111,14 +111,6 @@ else:
 
 # Short version (major.minor)
 version = ".".join(release.split(".")[:2])
-
-# html_context = {
-#   'current_version' : "1.0",
-#   'versions' : [["1.0", "link to 1.0"], ["2.0", "link to 2.0"]],
-#   'current_language': 'en',
-#   'languages': [["en", "link to en"], ["de", "link to de"]]
-# }
-
 
 html_context = {
     "current_version": release,

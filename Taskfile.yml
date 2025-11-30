@@ -26,7 +26,7 @@ tasks:
       - '{{.VENV}}/bin/flake8 src tests'
       - '{{.VENV}}/bin/pylint src tests'
 
-  lint:check:
+  lint-check:
     desc: "Validate formatting (no changes)"
     deps: [_check_venv]
     cmds:
@@ -34,13 +34,14 @@ tasks:
       - '{{.VENV}}/bin/isort --check-only src tests'
       - '{{.VENV}}/bin/flake8 src tests'
       - '{{.VENV}}/bin/pylint src tests  || true'
+      - '{{.VENV}}/bin/mypy src tests || true'
 
   tests:
     deps: [_check_venv]
     cmds:
       - '{{.VENV}}/bin/pytest -q'
 
-  check:clean:
+  check_clean:
     internal: true
     silent: true
     desc: "Fail if working tree is not clean"
@@ -52,7 +53,7 @@ tasks:
           exit 1
         fi
 
-  check:not-ci:
+  check_not-ci:
     cmds:
       - |
         if [ "${CI:-}" != "" ]; then
@@ -64,13 +65,13 @@ tasks:
   # Feature Branch Workflow (Developers)
   # ============================================================
 
-  feature:start:
+  feature-start:
     desc: "Sync main and create a new feature branch"
-    deps: [check:not-ci, check:clean]
+    deps: [check_not-ci, check_clean]
     cmds:
       - |
         if [ -z "{{.CLI_ARGS}}" ]; then
-          echo "Usage: task feature:start <branch-name>"
+          echo "Usage: task feature-start <branch-name>"
           exit 1
         fi
 
@@ -93,98 +94,81 @@ tasks:
   commit:
     desc: "Lint Check, test, update CHANGELOG, and commit staged changes (Conventional Commit format)"
     vars:
-      MSG:
-        sh: 'echo ${MSG:-}'
+      MSG: { sh: 'echo "${MSG:-}"' }
     cmds:
+      - |-
+        # === Update CHANGELOG under [Unreleased] ===
 
-      # 1) Ensure message is provided
-      - |
         if [ -z "{{.MSG}}" ]; then
-          echo "Usage: task commit MSG='feat: add MPC diagnostics'"
+          echo "ERROR: MSG is empty, cannot update CHANGELOG."
           exit 1
         fi
 
-      # 2) Enforce Conventional Commits
-      - |
-        if ! echo "{{.MSG}}" | grep -Eq '^(feat|fix|docs|style|refactor|perf|test|chore)(\([a-zA-Z0-9_-]+\))?: .+'; then
-          echo "ERROR: Commit message must follow Conventional Commits."
-          echo ""
-          echo "Allowed types:"
-          echo "  feat, fix, docs, style, refactor, perf, test, chore"
-          echo ""
-          echo "Example formats:"
-          echo "  feat: add new capability"
-          echo "  feat(scope): introduce feature in <scope>"
-          echo "  fix: correct incorrect behavior"
-          echo "  fix(scope): resolve issue in <scope>"
-          echo "  docs: update documentation"
-          echo "  docs(scope): modify docs in <scope>"
-          echo "  style: reformat code (no logic change)"
-          echo "  style(scope): adjust formatting in <scope>"
-          echo "  refactor: improve code structure (same behavior)"
-          echo "  refactor(scope): reorganize code in <scope>"
-          echo "  perf: improve performance"
-          echo "  perf(scope): optimize behavior in <scope>"
-          echo "  test: update or add tests"
-          echo "  test(scope): modify tests in <scope>"
-          echo "  chore: update build or tooling"
-          echo "  chore(scope): modify CI/scripts/config"
-          echo ""
-          echo "Usage: task commit MSG='feat: add <something>'"
-          exit 1
-        fi
+        MSG="{{.MSG}}"
+        TYPE=$(printf '%s\n' "$MSG" | cut -d':' -f1)
+        DESC=$(printf '%s\n' "$MSG" | cut -d':' -f2- | sed 's/^ *//')
+        DATE=$(date +%Y-%m-%d)
 
-      # 3) Do NOT allow committing on main
-      - |
-        BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-        if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; then
-          echo "ERROR: You are on '$BRANCH'. Commit only on feature branches."
-          exit 1
-        fi
-        echo "==> Current branch: $BRANCH"
-
-      # 4) Ensure something is staged (no git add . here)
-      - |
-        if git diff --cached --quiet; then
-          echo "ERROR: No staged files detected."
-          echo "Stage files manually using:"
-          echo "  git add <file1> <file2> ..."
-          exit 1
-        fi
-        echo "==> Staged files detected"
-
-      # 7) Run tests
-      - task tests
-
-      # 6) Lint (flake8)
-      - task lint:check
-
-      # 8) Update CHANGELOG under [Unreleased]
-      - |
-        echo "==> Updating CHANGELOG.md"
+        # Ensure CHANGELOG exists with structure
         if [ ! -f CHANGELOG.md ]; then
-          echo "# Changelog" > CHANGELOG.md
-          echo >> CHANGELOG.md
-          echo "## [Unreleased]" >> CHANGELOG.md
-          echo >> CHANGELOG.md
+          cat > CHANGELOG.md <<'EOF'
+        # Changelog
+
+        ## [Unreleased]
+
+        ### Added
+
+        ### Changed
+
+        ### Fixed
+
+        EOF
         fi
 
-        # Ensure [Unreleased] section exists in existing changelog
         if ! grep -q '^## \[Unreleased\]' CHANGELOG.md; then
-          echo "ERROR: '## [Unreleased]' section missing in CHANGELOG.md."
-          echo "Add it back manually before committing."
+          echo "ERROR: '## [Unreleased]' section missing."
           exit 1
         fi
 
-        DATE="$(date +%Y-%m-%d)"
-        awk -v msg="- ${DATE}: {{.MSG}}" '
-          /^## \[Unreleased\]/ && !seen++ { print; print ""; print msg; next }
-          { print }
+        # Map type → section
+        case "$TYPE" in
+          feat) SECTION="### Added" ;;
+          fix) SECTION="### Fixed" ;;
+          chore) SECTION="### Changed" ;;
+          *) SECTION="### Changed" ;;
+        esac
+
+        # Insert bullet under correct section
+        awk -v section="$SECTION" -v line="- ${DATE}: ${TYPE}: ${DESC}" '
+          BEGIN { in_unrel=0; inserted=0 }
+          /^## \[Unreleased\]/ { in_unrel=1 }
+          /^## \[/ && $0 !~ /\[Unreleased\]/ { in_unrel=0 }
+          {
+            if (in_unrel && $0 == section && !inserted) {
+              # Print the section heading
+              print $0
+              # Exactly one blank line after heading
+              print ""
+              # New bullet
+              print line
+              inserted=1
+
+              # Consume the next line from the original file:
+              # if it is blank, skip it; if not, print it
+              if (getline nextline) {
+                if (nextline != "") {
+                  print nextline
+                }
+              }
+              next
+            }
+            print
+          }
         ' CHANGELOG.md > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
 
-        git add CHANGELOG.md
+        git add CHANGELOG.md || true
 
-      # 9) Commit ONLY staged changes
+      # 7) Commit ONLY staged changes
       - |
         echo "==> Committing staged changes"
         git commit -m "{{.MSG}}"
@@ -192,9 +176,9 @@ tasks:
         echo "Committed on '$BRANCH' with message:"
         echo "  {{.MSG}}"
 
-  feature:push:
+  feature-push:
     desc: "Run tests, rebase current branch on main, then push"
-    deps: [check:not-ci, check:clean]
+    deps: [check_not-ci, check_clean]
     cmds:
       - |
         BRANCH="$(git rev-parse --abbrev-ref HEAD)"
@@ -228,15 +212,15 @@ tasks:
   # Docs
   # ============================================================
 
-  docs:clean:
+  docs-clean:
     desc: "Clean built docs"
     cmds:
       - rm -rf docs/_build/*
       - rm -rf docs/source/api/*
 
-  docs:api:
+  docs-api:
     desc: "Generate API docs with sphinx-apidoc"
-    deps: [docs:clean]
+    deps: [docs-clean]
     vars:
       SOURCEDIR: docs/source
       # Each entry is a path given to sphinx-apidoc
@@ -252,9 +236,9 @@ tasks:
             "$pkg"
         done
 
-  docs:build:
+  docs-build:
     desc: "Build Sphinx docs"
-    deps: [docs:api]
+    deps: [docs-api]
     cmds:
       - |
         if ! command -v sphinx-build >/dev/null; then
@@ -263,13 +247,13 @@ tasks:
         fi
       - .venv/bin/sphinx-build -b html docs/source docs/_build/html
 
-  docs:serve:
+  docs-serve:
     desc: "Serve built documentation"
-    deps: [docs:build]
+    deps: [docs-build]
     cmds:
       - |
         if [ ! -d docs/_build/html ]; then
-          echo "Docs not built. Run: task docs:build"
+          echo "Docs not built. Run: task docs-build"
           exit 1
         fi
       - echo "Serving docs at http://localhost:8000"
@@ -278,28 +262,29 @@ tasks:
   # ============================================================
   # Environment & Dev Utilities
   # ============================================================
-  dev:env-create:
+  dev-env-create:
     desc: "Create virtualenv"
     cmds:
       - '{{.PYTHON}} -m venv {{.VENV}}'
       - '{{.VENV}}/bin/pip install -U pip'
 
-  dev:env-export:
+  dev-env-export:
     desc: "Export environment for developer to requirements-lock.txt"
     deps: [_check_venv]
     cmds:
       - '{{.VENV}}/bin/pip freeze > requirements-lock.txt'
       - echo "Exported to requirements-lock.txt"
 
-  dev:env-install:
+  dev-env-install:
     desc: "Install project with all dev & docs tools"
-    deps: [dev:env-create, _check_venv]
+    deps: [dev-env-create, _check_venv]
     cmds:
       - '{{.VENV}}/bin/pip install -e ".[dev,docs]"'
+      - '{{.VENV}}/bin/pre-commit install'
 
-  release:cut:
+  release-cut:
     desc: "Full release: bump VERSION + pyproject.toml, rotate CHANGELOG, tag, push"
-    deps: [check:not-ci, check:clean]
+    deps: [check_not-ci, check_clean]
     vars:
       NEW_VERSION:
         sh: 'echo ${VER:-}'
@@ -307,7 +292,7 @@ tasks:
       # 0) Ensure version was provided
       - |
         if [ -z "{{.NEW_VERSION}}" ]; then
-          echo "Usage: VER=1.2.0 task release:cut"
+          echo "Usage: VER=1.2.0 task release-cut"
           exit 1
         fi
 
@@ -315,7 +300,7 @@ tasks:
       - |
         BRANCH="$(git rev-parse --abbrev-ref HEAD)"
         if [ "$BRANCH" != "main" ]; then
-          echo "ERROR: release:cut must be run on main, currently on '$BRANCH'"
+          echo "ERROR: release-cut must be run on main, currently on '$BRANCH'"
           exit 1
         fi
 
@@ -401,3 +386,40 @@ tasks:
       - git tag -a "v{{.NEW_VERSION}}" -m "Release v{{.NEW_VERSION}}"
       - git push
       - git push origin "v{{.NEW_VERSION}}"
+
+  clean:
+    desc: "Clean cache and build artifacts (keeps the virtual env)"
+    cmds:
+      - echo ">>> Cleaning Python caches, test cache, mypy cache, build artifacts, benchmarks"
+
+      # pytest
+      - rm -rf .pytest_cache
+
+      # mypy
+      - rm -rf .mypy_cache
+
+      # coverage
+      - rm -f .coverage
+      - rm -rf htmlcov
+
+      # benchmarks (pytest-benchmark)
+      - rm -rf .benchmarks
+
+      # build artifacts
+      - rm -rf dist build
+      - rm -rf *.egg-info
+
+      # Python bytecode caches
+      - find . -type d -name "__pycache__" -exec rm -rf {} +
+
+      # Jupyter notebook junk
+      - find . -type d -name ".ipynb_checkpoints" -exec rm -rf {} +
+
+      # virtual documents (Jupyter)
+      - rm -rf .virtual_documents
+
+      # Sphinx build (optional — remove if you want to keep docs cache)
+      - rm -rf docs/_build
+
+      # pre-commit cache (optional)
+      - rm -rf ~/.cache/pre-commit
