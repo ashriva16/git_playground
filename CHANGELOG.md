@@ -2,25 +2,32 @@
 
 ## [Unreleased]
 
+### Added
+
+- 2025-11-29: feat: adding pre commit
+
+- 2025-11-29: feat: adding pre commit
+
+- 2025-11-29: feat: adding pre commit
+
+- 2025-11-29: feat: adding pre commit
+
 - 2025-11-29: feat: adding task clean and dev list in .toml
 
-- 2025-11-29: feat: fixing pre commit
-
 - 2025-11-29: feat: adding pre commit
 
-- 2025-11-29: feat: adding pre commit
+- 2025-11-29: feat: add main.py file
 
-- 2025-11-29: feat: adding pre commit
-
-- 2025-11-29: feat: adding pre commit
-
-- 2025-11-29: feat: adding pre commit
-
-- 2025-11-29: fix: documentation
+### Changed
+- 2025-11-30: refactor: how changelog is updated
 
 - 2025-11-29: refactor: Taskfile pyproject
 
-- 2025-11-29: feat: add main.py file
+### Fixed
+
+- 2025-11-29: fix: fixing pre commit
+
+- 2025-11-29: fix: documentation
 
 ## [1.1.0] - 2025-11-29
 

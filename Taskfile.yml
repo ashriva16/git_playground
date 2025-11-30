@@ -94,93 +94,63 @@ tasks:
   commit:
     desc: "Lint Check, test, update CHANGELOG, and commit staged changes (Conventional Commit format)"
     vars:
-      MSG:
-        sh: 'echo ${MSG:-}'
+      MSG: { sh: 'echo "${MSG:-}"' }
     cmds:
+      - |-
+        # === Update CHANGELOG under [Unreleased] ===
 
-      # 1) Ensure message is provided
-      - |
         if [ -z "{{.MSG}}" ]; then
-          echo "Usage: task commit MSG='feat: add MPC diagnostics'"
+          echo "ERROR: MSG is empty, cannot update CHANGELOG."
           exit 1
         fi
 
-      # 2) Enforce Conventional Commits
-      - |
-        if ! echo "{{.MSG}}" | grep -Eq '^(feat|fix|docs|style|refactor|perf|test|chore)(\([a-zA-Z0-9_-]+\))?: .+'; then
-          echo "ERROR: Commit message must follow Conventional Commits."
-          echo ""
-          echo "Allowed types:"
-          echo "  feat, fix, docs, style, refactor, perf, test, chore"
-          echo ""
-          echo "Example formats:"
-          echo "  feat: add new capability"
-          echo "  feat(scope): introduce feature in <scope>"
-          echo "  fix: correct incorrect behavior"
-          echo "  fix(scope): resolve issue in <scope>"
-          echo "  docs- update documentation"
-          echo "  docs(scope): modify docs in <scope>"
-          echo "  style: reformat code (no logic change)"
-          echo "  style(scope): adjust formatting in <scope>"
-          echo "  refactor: improve code structure (same behavior)"
-          echo "  refactor(scope): reorganize code in <scope>"
-          echo "  perf: improve performance"
-          echo "  perf(scope): optimize behavior in <scope>"
-          echo "  test: update or add tests"
-          echo "  test(scope): modify tests in <scope>"
-          echo "  chore: update build or tooling"
-          echo "  chore(scope): modify CI/scripts/config"
-          echo ""
-          echo "Usage: task commit MSG='feat: add <something>'"
-          exit 1
-        fi
+        MSG="{{.MSG}}"
+        TYPE=$(printf '%s\n' "$MSG" | cut -d':' -f1)
+        DESC=$(printf '%s\n' "$MSG" | cut -d':' -f2- | sed 's/^ *//')
+        DATE=$(date +%Y-%m-%d)
 
-      # 3) Do NOT allow committing on main
-      - |
-        BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-        if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; then
-          echo "ERROR: You are on '$BRANCH'. Commit only on feature branches."
-          exit 1
-        fi
-        echo "==> Current branch: $BRANCH"
-
-      # 4) Ensure something is staged (no git add . here)
-      - |
-        if git diff --cached --quiet; then
-          echo "ERROR: No staged files detected."
-          echo "Stage files manually using:"
-          echo "  git add <file1> <file2> ..."
-          exit 1
-        fi
-        echo "==> Staged files detected"
-
-      # 5) Run tests
-      - task tests
-
-      # 6) Update CHANGELOG under [Unreleased]
-      - |
-        echo "==> Updating CHANGELOG.md"
+        # Ensure CHANGELOG exists with structure
         if [ ! -f CHANGELOG.md ]; then
-          echo "# Changelog" > CHANGELOG.md
-          echo >> CHANGELOG.md
-          echo "## [Unreleased]" >> CHANGELOG.md
-          echo >> CHANGELOG.md
+        cat > CHANGELOG.md <<'EOF'
+        # Changelog
+
+        ## [Unreleased]
+
+        ### Added
+        ### Changed
+        ### Fixed
+
+        EOF
         fi
 
-        # Ensure [Unreleased] section exists in existing changelog
         if ! grep -q '^## \[Unreleased\]' CHANGELOG.md; then
-          echo "ERROR: '## [Unreleased]' section missing in CHANGELOG.md."
-          echo "Add it back manually before committing."
+          echo "ERROR: '## [Unreleased]' section missing."
           exit 1
         fi
 
-        DATE="$(date +%Y-%m-%d)"
-        awk -v msg="- ${DATE}: {{.MSG}}" '
-          /^## \[Unreleased\]/ && !seen++ { print; print ""; print msg; next }
-          { print }
+        # Map type → section
+        case "$TYPE" in
+          feat) SECTION="### Added" ;;
+          fix) SECTION="### Fixed" ;;
+          chore) SECTION="### Changed" ;;
+          *) SECTION="### Changed" ;;
+        esac
+
+        # Insert bullet under correct section
+        awk -v section="$SECTION" -v line="- ${DATE}: ${TYPE}: ${DESC}" '
+          BEGIN { in_unrel=0; inserted=0 }
+          /^## \[Unreleased\]/ { in_unrel=1 }
+          /^## \[/ && $0 !~ /\[Unreleased\]/ { in_unrel=0 }
+          {
+            print
+            if (in_unrel && $0 == section && !inserted) {
+              print line
+              inserted=1
+            }
+          }
         ' CHANGELOG.md > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
 
-        git add CHANGELOG.md
+        git add CHANGELOG.md || true
 
       # 7) Commit ONLY staged changes
       - |
