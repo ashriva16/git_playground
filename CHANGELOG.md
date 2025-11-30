@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- 2025-11-29: feat: adding task clean and dev list in .toml
+
 - 2025-11-29: feat: fixing pre commit
 
 - 2025-11-29: feat: adding pre commit
