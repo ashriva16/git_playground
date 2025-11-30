@@ -26,7 +26,7 @@ tasks:
       - '{{.VENV}}/bin/flake8 src tests'
       - '{{.VENV}}/bin/pylint src tests'
 
-  lint:check:
+  lint_check:
     desc: "Validate formatting (no changes)"
     deps: [_check_venv]
     cmds:
@@ -40,7 +40,7 @@ tasks:
     cmds:
       - '{{.VENV}}/bin/pytest -q'
 
-  check:clean:
+  check_clean:
     internal: true
     silent: true
     desc: "Fail if working tree is not clean"
@@ -52,7 +52,7 @@ tasks:
           exit 1
         fi
 
-  check:not-ci:
+  check_not-ci:
     cmds:
       - |
         if [ "${CI:-}" != "" ]; then
@@ -64,13 +64,13 @@ tasks:
   # Feature Branch Workflow (Developers)
   # ============================================================
 
-  feature:start:
+  feature_start:
     desc: "Sync main and create a new feature branch"
-    deps: [check:not-ci, check:clean]
+    deps: [check_not-ci, check_clean]
     cmds:
       - |
         if [ -z "{{.CLI_ARGS}}" ]; then
-          echo "Usage: task feature:start <branch-name>"
+          echo "Usage: task feature_start <branch-name>"
           exit 1
         fi
 
@@ -117,7 +117,7 @@ tasks:
           echo "  feat(scope): introduce feature in <scope>"
           echo "  fix: correct incorrect behavior"
           echo "  fix(scope): resolve issue in <scope>"
-          echo "  docs: update documentation"
+          echo "  docs- update documentation"
           echo "  docs(scope): modify docs in <scope>"
           echo "  style: reformat code (no logic change)"
           echo "  style(scope): adjust formatting in <scope>"
@@ -153,13 +153,10 @@ tasks:
         fi
         echo "==> Staged files detected"
 
-      # 7) Run tests
+      # 5) Run tests
       - task tests
 
-      # 6) Lint (flake8)
-      - task lint:check
-
-      # 8) Update CHANGELOG under [Unreleased]
+      # 6) Update CHANGELOG under [Unreleased]
       - |
         echo "==> Updating CHANGELOG.md"
         if [ ! -f CHANGELOG.md ]; then
@@ -184,7 +181,7 @@ tasks:
 
         git add CHANGELOG.md
 
-      # 9) Commit ONLY staged changes
+      # 7) Commit ONLY staged changes
       - |
         echo "==> Committing staged changes"
         git commit -m "{{.MSG}}"
@@ -192,9 +189,9 @@ tasks:
         echo "Committed on '$BRANCH' with message:"
         echo "  {{.MSG}}"
 
-  feature:push:
+  feature_push:
     desc: "Run tests, rebase current branch on main, then push"
-    deps: [check:not-ci, check:clean]
+    deps: [check_not-ci, check_clean]
     cmds:
       - |
         BRANCH="$(git rev-parse --abbrev-ref HEAD)"
@@ -228,15 +225,15 @@ tasks:
   # Docs
   # ============================================================
 
-  docs:clean:
+  docs-clean:
     desc: "Clean built docs"
     cmds:
       - rm -rf docs/_build/*
       - rm -rf docs/source/api/*
 
-  docs:api:
+  docs-api:
     desc: "Generate API docs with sphinx-apidoc"
-    deps: [docs:clean]
+    deps: [docs-clean]
     vars:
       SOURCEDIR: docs/source
       # Each entry is a path given to sphinx-apidoc
@@ -252,9 +249,9 @@ tasks:
             "$pkg"
         done
 
-  docs:build:
+  docs-build:
     desc: "Build Sphinx docs"
-    deps: [docs:api]
+    deps: [docs-api]
     cmds:
       - |
         if ! command -v sphinx-build >/dev/null; then
@@ -263,13 +260,13 @@ tasks:
         fi
       - .venv/bin/sphinx-build -b html docs/source docs/_build/html
 
-  docs:serve:
+  docs-serve:
     desc: "Serve built documentation"
-    deps: [docs:build]
+    deps: [docs-build]
     cmds:
       - |
         if [ ! -d docs/_build/html ]; then
-          echo "Docs not built. Run: task docs:build"
+          echo "Docs not built. Run: task docs-build"
           exit 1
         fi
       - echo "Serving docs at http://localhost:8000"
@@ -278,28 +275,29 @@ tasks:
   # ============================================================
   # Environment & Dev Utilities
   # ============================================================
-  dev:env-create:
+  dev-env-create:
     desc: "Create virtualenv"
     cmds:
       - '{{.PYTHON}} -m venv {{.VENV}}'
       - '{{.VENV}}/bin/pip install -U pip'
 
-  dev:env-export:
+  dev-env-export:
     desc: "Export environment for developer to requirements-lock.txt"
     deps: [_check_venv]
     cmds:
       - '{{.VENV}}/bin/pip freeze > requirements-lock.txt'
       - echo "Exported to requirements-lock.txt"
 
-  dev:env-install:
+  dev-env-install:
     desc: "Install project with all dev & docs tools"
-    deps: [dev:env-create, _check_venv]
+    deps: [dev-env-create, _check_venv]
     cmds:
       - '{{.VENV}}/bin/pip install -e ".[dev,docs]"'
+      - '{{.VENV}}/bin/pre-commit install'
 
   release:cut:
     desc: "Full release: bump VERSION + pyproject.toml, rotate CHANGELOG, tag, push"
-    deps: [check:not-ci, check:clean]
+    deps: [check_not-ci, check_clean]
     vars:
       NEW_VERSION:
         sh: 'echo ${VER:-}'

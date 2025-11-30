@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+- 2025-11-29: feat: adding pre commit
+
+- 2025-11-29: feat: adding pre commit
+
+- 2025-11-29: feat: adding pre commit
+
+- 2025-11-29: feat: adding pre commit
+
+- 2025-11-29: feat: adding pre commit
+
 - 2025-11-29: fix: documentation
 
 - 2025-11-29: refactor: Taskfile pyproject
