@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- 2025-11-29: fix: documentation
+
 - 2025-11-29: refactor: Taskfile pyproject
 
 - 2025-11-29: feat: add main.py file

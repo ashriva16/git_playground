@@ -1,26 +1,13 @@
-Welcome to Documentation
+Getting Started
 ========================================================
 
-Introduction
-------------
 
-{{ cookiecutter.project_description }}
-
-.. include:: ../README.md
+.. include:: ../../README.md
    :parser: myst_parser.sphinx_
-
-Key Features
-------------
-
-- Comprehensive API Reference
-- Easy-to-follow guides and examples
-- Automatically generated from docstrings
-
-Contents
---------
 
 .. toctree::
    :maxdepth: 2
+   :titlesonly:
    :caption: Modules
 
-   api/modules
+   api/src/modules

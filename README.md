@@ -46,7 +46,7 @@ git checkout vX.Y.Z
 
 ## 🧱 Project Structure
 
-```plaintxt
+```text
 ├── VERSION                  # Current project version (e.g., 0.1.0)
 ├── CHANGELOG.md             # Chronological change history
 ├── requirements.txt         # End-user dependencies

@@ -228,8 +228,15 @@ tasks:
   # Docs
   # ============================================================
 
+  docs:clean:
+    desc: "Clean built docs"
+    cmds:
+      - rm -rf docs/_build/*
+      - rm -rf docs/source/api/*
+
   docs:api:
     desc: "Generate API docs with sphinx-apidoc"
+    deps: [docs:clean]
     vars:
       SOURCEDIR: docs/source
       # Each entry is a path given to sphinx-apidoc
@@ -254,7 +261,7 @@ tasks:
           echo "sphinx-build not found. Install docs dependencies."
           exit 1
         fi
-      - .venv/bin/sphinx-build -M html docs/source docs/_build/html
+      - .venv/bin/sphinx-build -b html docs/source docs/_build/html
 
   docs:serve:
     desc: "Serve built documentation"
