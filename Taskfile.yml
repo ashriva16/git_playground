@@ -117,7 +117,9 @@ tasks:
         ## [Unreleased]
 
         ### Added
+
         ### Changed
+
         ### Fixed
 
         EOF
@@ -144,7 +146,6 @@ tasks:
           {
             print
             if (in_unrel && $0 == section && !inserted) {
-              print ""
               print line
               inserted=1
             }
