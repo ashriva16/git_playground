@@ -48,7 +48,6 @@ dev = [
   "ipykernel==6.29.5",
   "ipdb==0.13.13",
   "debugpy==1.8.7",
-  "pdbpp==0.10.3",
   "jupyterlab==4.2.5",
 
   # --- Profilers ---

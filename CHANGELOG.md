@@ -20,6 +20,7 @@
 
 ### Fixed
 
+- 2025-11-30: fix: remove pdbpp
 - 2025-11-30: fix: another newline fix in changelog
 - 2025-11-30: fix: another newline fix in changelog
 - 2025-11-30: fix: newline after subsections in changelog
