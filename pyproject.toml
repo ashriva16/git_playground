@@ -22,7 +22,8 @@ docs = [
   "sphinx-rtd-theme",
   "nbsphinx",
   "myst-parser",
-  "sphinx-last-updated-by-git"
+  "sphinx-last-updated-by-git",
+  "sphinx-autodoc-typehints"
 ]
 dev = [
   "pytest>=6.0",

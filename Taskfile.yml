@@ -228,19 +228,37 @@ tasks:
   # Docs
   # ============================================================
 
+  docs:api:
+    desc: "Generate API docs with sphinx-apidoc"
+    vars:
+      SOURCEDIR: docs/source
+      # Each entry is a path given to sphinx-apidoc
+      API_PACKAGES: "src"
+    cmds:
+      - |
+        for pkg in {{.API_PACKAGES}}; do
+          outdir="{{.SOURCEDIR}}/api/$pkg"
+          mkdir -p "$outdir"
+          .venv/bin/sphinx-apidoc -e -M -f \
+            -t "{{.SOURCEDIR}}/_templates" \
+            -o "$outdir" \
+            "$pkg"
+        done
+
   docs:build:
     desc: "Build Sphinx docs"
-    deps: [_check_venv]
+    deps: [docs:api]
     cmds:
       - |
         if ! command -v sphinx-build >/dev/null; then
           echo "sphinx-build not found. Install docs dependencies."
           exit 1
         fi
-      - '{{.VENV}}/bin/sphinx-build -b html docs/source docs/_build/html'
+      - .venv/bin/sphinx-build -M html docs/source docs/_build/html
 
   docs:serve:
     desc: "Serve built documentation"
+    deps: [docs:build]
     cmds:
       - |
         if [ ! -d docs/_build/html ]; then
@@ -249,12 +267,6 @@ tasks:
         fi
       - echo "Serving docs at http://localhost:8000"
       - cd docs/_build/html && python3 -m http.server 8000
-
-  docs:clean:
-    desc: "Clean built docs"
-    cmds:
-      - rm -rf docs/_build/*
-      - rm -rf docs/source/api/*
 
   # ============================================================
   # Environment & Dev Utilities
