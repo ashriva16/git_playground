@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- 2025-11-29: feat: fixing pre commit
+
 - 2025-11-29: feat: adding pre commit
 
 - 2025-11-29: feat: adding pre commit

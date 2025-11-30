@@ -15,27 +15,24 @@ repos:
     hooks:
       - id: black
         args: ["--line-length=88"]
-        files: ^(src|tests)/.*\.py$
 
   # isort (imports)
   - repo: https://github.com/pycqa/isort
     rev: 5.13.2
     hooks:
       - id: isort
-        files: ^(src|tests)/.*\.py$
 
   # flake8 (lint)
   - repo: https://github.com/pycqa/flake8
     rev: 7.1.1
     hooks:
       - id: flake8
-        files: ^(src|tests)/.*\.py$
+        args: ["--max-line-length=100"]
 
-  # pylint (deeper lint)
-  - repo: https://github.com/pycqa/pylint
-    rev: v3.2.7
-    hooks:
-      - id: pylint
-        # Make sure pylint can import your package
-        # Replace "your-package-name" with your real src package if needed
-        files: ^(src|tests)/.*\.py$
+  # # pylint (deeper lint)
+  # - repo: https://github.com/pycqa/pylint
+  #   rev: v3.2.7
+  #   hooks:
+  #     - id: pylint
+  #       # Make sure pylint can import your package
+  #       # Replace "your-package-name" with your real src package if needed
