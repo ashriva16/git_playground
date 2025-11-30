@@ -31,6 +31,19 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[docs]"
 
+      - name: Generate API docs with sphinx-apidoc
+        run: |
+          SOURCEDIR="docs/source"
+          API_PACKAGES="src"
+          for pkg in $API_PACKAGES; do
+            outdir="${SOURCEDIR}/api/${pkg}"
+            mkdir -p "$outdir"
+            sphinx-apidoc -e -M -f \
+              -t "${SOURCEDIR}/_templates" \
+              -o "$outdir" \
+              "$pkg"
+          done
+
       - name: Build Sphinx HTML
         run: |
           sphinx-build -b html docs/source docs/_build/html
