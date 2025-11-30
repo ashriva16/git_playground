@@ -14,6 +14,7 @@
 
 ### Changed
 
+- 2025-11-30: add: vscode settings, improve toml and cleaned docs-conf
 - 2025-11-30: refactor: how changelog is updated
 - 2025-11-29: refactor: Taskfile pyproject
 

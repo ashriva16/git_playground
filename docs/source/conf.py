@@ -112,14 +112,6 @@ else:
 # Short version (major.minor)
 version = ".".join(release.split(".")[:2])
 
-# html_context = {
-#   'current_version' : "1.0",
-#   'versions' : [["1.0", "link to 1.0"], ["2.0", "link to 2.0"]],
-#   'current_language': 'en',
-#   'languages': [["en", "link to en"], ["de", "link to de"]]
-# }
-
-
 html_context = {
     "current_version": release,
     "versions": [
