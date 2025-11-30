@@ -111,7 +111,7 @@ tasks:
 
         # Ensure CHANGELOG exists with structure
         if [ ! -f CHANGELOG.md ]; then
-        cat > CHANGELOG.md <<'EOF'
+          cat > CHANGELOG.md <<'EOF'
         # Changelog
 
         ## [Unreleased]
@@ -144,11 +144,25 @@ tasks:
           /^## \[Unreleased\]/ { in_unrel=1 }
           /^## \[/ && $0 !~ /\[Unreleased\]/ { in_unrel=0 }
           {
-            print
             if (in_unrel && $0 == section && !inserted) {
+              # Print the section heading
+              print $0
+              # Exactly one blank line after heading
+              print ""
+              # New bullet
               print line
               inserted=1
+
+              # Consume the next line from the original file:
+              # if it is blank, skip it; if not, print it
+              if (getline nextline) {
+                if (nextline != "") {
+                  print nextline
+                }
+              }
+              next
             }
+            print
           }
         ' CHANGELOG.md > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
 
