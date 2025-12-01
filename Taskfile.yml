@@ -423,3 +423,11 @@ tasks:
 
       # pre-commit cache (optional)
       - rm -rf ~/.cache/pre-commit
+
+  usr-export:
+    desc: "Export environment for user to requirements.txt"
+    deps: [_check_venv]
+    cmds:
+      - 'pip install pip-tools'
+      - 'pip-compile --resolver=backtracking pyproject.toml'
+      - echo "Exported to requirements.txt"
