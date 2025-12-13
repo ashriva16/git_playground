@@ -24,8 +24,8 @@
 
 ## 📌 Overview
 
-A minimal end-to-end MLOps template showcasing reproducible environments,
-CI/CD, docs automation, experiment prototypes, and packaging best practices.
+A lightweight MLOps playground focused on practicing end-to-end workflows for deployment and production.
+Covers reproducible environments, experiment execution, packaging, automation, and CI/CD fundamentals.
 
 ### ✨ Features
 
@@ -191,3 +191,4 @@ This project is licensed under the [MIT License](https://opensource.org/licenses
 - [Cookiecutter Docs](https://cookiecutter.readthedocs.io)
 - [PEP 621](https://peps.python.org/pep-0621/)
 - [GitHub Actions](https://docs.github.com/en/actions)
+- [MLOPS_example](https://github.com/gift-exe/customer-satisfaction-mlops-main)

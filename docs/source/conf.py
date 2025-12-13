@@ -14,9 +14,9 @@ if PROJECT_ROOT not in sys.path:
 # -----------------------------------------------------------------------------
 # Project information
 # -----------------------------------------------------------------------------
-project = "Playground"
+project = "mlops_playground"
 author = "Ankit Shrivastava"
-copyright = f"2025, {author}"
+copyright = "2025, Ankit Shrivastava"
 
 
 # -----------------------------------------------------------------------------
@@ -90,12 +90,14 @@ autosummary_generate = True
 # Custom autodoc behavior (never skip special methods)
 # -----------------------------------------------------------------------------
 def skip(app, what, name, obj, would_skip, options):
+    """Decide whether Sphinx autodoc should skip a member."""
     if name in ("__init__", "__repr__", "__str__"):
         return False
     return would_skip
 
 
 def setup(app):
+    """Register Sphinx event hooks."""
     app.connect("autodoc-skip-member", skip)
 
 

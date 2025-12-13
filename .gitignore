@@ -207,3 +207,21 @@ marimo/_lsp/
 __marimo__/
 
 docs/source/api/*
+
+# Ignore everything inside data/ and results/
+data/**
+results/**
+
+# Allow directory traversal so negations work
+!data/**/
+!results/**/
+
+# Keep only .gitkeep files (any depth)
+!data/**/.gitkeep
+!results/**/.gitkeep
+
+# Always keep DVC metadata
+!.dvc/
+!.dvcignore
+
+Taskfile.yml

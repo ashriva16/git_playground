@@ -1,0 +1,10 @@
+{
+  "repo": "ashriva16/installations_and_scripts",
+  "ref": "main",
+  "items": [
+    { "src": "opts.py", "dst": "utils/opts.py", "mode": "0644" },
+    { "src": "plots/scplot.py", "dst": "utils/scplot.py", "mode": "0644" },
+    { "src": "ml_specific/logger.py", "dst": "utils/logger.py", "mode": "0644" },
+    { "src": "ml_specific/torch_setup.py", "dst": "utils/torch_setup.py", "mode": "0644" }
+  ]
+}
