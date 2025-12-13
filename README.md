@@ -53,7 +53,6 @@ git checkout vX.Y.Z
 ├── requirements-lock.txt    # Frozen dependency set for reproducibility
 ├── LICENSE                  # Project license
 ├── Makefile                 # End-user automation commands
-├── Taskfile.yml             # Optional. Internal automation; NOT required for contributors.
 ├── pyproject.toml           # Build system, metadata, deps, lint/format config
 ├── README.md                # Project overview and usage guide
 │
@@ -165,11 +164,6 @@ git push -u origin <feature-name>
 ```
 
 PR will be reviewed by admin as soon as possible.
-
-### Optional tools
-
-The Taskfile.yml contains shortcuts used for development automation.
-Contributors do not need it
 
 ## 👤 Maintainer
 
