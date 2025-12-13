@@ -14,14 +14,15 @@ if PROJECT_ROOT not in sys.path:
 # -----------------------------------------------------------------------------
 # Project information
 # -----------------------------------------------------------------------------
+
 project = "mlops_playground"
 author = "Ankit Shrivastava"
 copyright = "2025, Ankit Shrivastava"
 
-
 # -----------------------------------------------------------------------------
 # General configuration
 # -----------------------------------------------------------------------------
+
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 master_doc = "index"
@@ -31,7 +32,6 @@ add_module_names = False
 
 # Member ordering in autodoc
 autodoc_member_order = "groupwise"
-
 
 # -----------------------------------------------------------------------------
 # Sphinx extensions
@@ -54,14 +54,12 @@ myst_enable_extensions = [
     "dollarmath",
 ]
 
-
 # -----------------------------------------------------------------------------
 # HTML output configuration
 # -----------------------------------------------------------------------------
 html_theme = "sphinx_rtd_theme"
 html_show_sourcelink = True
 html_last_updated_fmt = "%b %d, %Y"
-
 
 # -----------------------------------------------------------------------------
 # Autodoc behavior
@@ -89,7 +87,7 @@ autosummary_generate = True
 # -----------------------------------------------------------------------------
 # Custom autodoc behavior (never skip special methods)
 # -----------------------------------------------------------------------------
-def skip(app, what, name, obj, would_skip, options):
+def skip(_app, _what, name, _obj, would_skip, _options):
     """Decide whether Sphinx autodoc should skip a member."""
     if name in ("__init__", "__repr__", "__str__"):
         return False
@@ -104,9 +102,10 @@ def setup(app):
 # -----------------------------------------------------------------------------
 # Version from VERSION file
 # -----------------------------------------------------------------------------
+
 VERSION_FILE = os.path.join(PROJECT_ROOT, "VERSION")
 if os.path.exists(VERSION_FILE):
-    with open(VERSION_FILE) as f:
+    with open(VERSION_FILE, encoding="utf-8") as f:
         release = f.read().strip()
 else:
     release = "0.0.0"  # fallback if VERSION missing

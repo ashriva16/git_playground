@@ -27,54 +27,16 @@
 A lightweight MLOps playground focused on practicing end-to-end workflows for deployment and production.
 Covers reproducible environments, experiment execution, packaging, automation, and CI/CD fundamentals.
 
-### ✨ Features
-
 ---
 
 ## 📁 Repository Setup
 
 ```sh
-git clone https://github.com/<username>/<repo>.git
-cd <repo>
+git clone https://github.com/<username>/mlops_playground.git
+cd mlops_playground
 ```
 
-If you need a specific version:
-
-```sh
-git checkout vX.Y.Z
-```
-
-## 🧱 Project Structure
-
-```text
-├── VERSION                  # Current project version (e.g., 0.1.0)
-├── CHANGELOG.md             # Chronological change history
-├── requirements.txt         # End-user dependencies
-├── requirements-lock.txt    # Frozen dependency set for reproducibility
-├── LICENSE                  # Project license
-├── Makefile                 # End-user automation commands
-├── pyproject.toml           # Build system, metadata, deps, lint/format config
-├── README.md                # Project overview and usage guide
-│
-├── docs/                              # Sphinx/MkDocs documentation
-│   ├── _build/
-│   │   └── html/                      # Generated HTML output
-│   ├── make.bat                       # Windows build helper
-│   ├── Makefile                       # Sphinx makefile for docs
-│   └── source/
-│       ├── api/                       # API auto-docs
-│       ├── conf.py                    # Sphinx configuration
-│       ├── index.rst                  # Docs entry point
-│       └── _templates/                # HTML/Jinja templates
-│
-├── playground/              # Scratchpad; not part of production pipeline
-├── src/                     # Production-grade code; packaged via pyproject.toml.
-├── utils/                   # Shared utilities used across the project consider merging into src/ if used by package.
-└── .github/
-    └── workflows/           # CI/CD pipelines
-        ├── docs.yml         # Docs build/deploy CI
-        └── main.yml         # Main CI (lint, test, build)
-```
+---
 
 ## 🚀 End-User Setup & Usage
 
@@ -109,61 +71,73 @@ git checkout vX.Y.Z
 - **Usage**
 
     ```sh
-    .venv/bin/python main.py
+    .venv/bin/python -m ml_project.main
     ```
+
+---
 
 ## 🤝 Contributing
 
 Contributions are encouraged and appreciated. To maintain a clean history, all changes must be made on feature branches (direct pushes to main may be restricted).
 
-### Setup
+### Setup Development Environment
 
-```sh
-python3 -m venv .venv
-pip install --upgrade pip
-source .venv/bin/activate
-pip install -e ".[dev,docs]"
-```
+  ```sh
+  python3 -m venv .venv
+  pip install --upgrade pip
+  source .venv/bin/activate
+  pip install -e ".[dev]"
+  ```
 
 This installs:
 
 - the project in editable mode
-- dev tools (pytest, black, isort, flake8, pylint)
+- dev tools (pytest, black, isort, flake8, pylint, mypy)
 - docs tools (sphinx, myst-parser, nbsphinx, etc.)
 
 ### Workflow
 
-- To get started:
+- Follow the method to push/pull your transformations
 
-```sh
-source .venv/bin/activate
-# Make sure main is up to date
-git checkout main
-git pull --rebase
-# Create a feature branch
-git checkout -b <feature-name>
-```
+- **Getting started**
 
-- Optional but recommended checks:
+  ```sh
+  source .venv/bin/activate
+  # Make sure main is up to date
+  git pull origin main
+  ```
 
-```sh
-pytest
-black <files>
-isort <files>
-flake8 <files>
-```
+- **Create your branch for your task (choose a clear name) and follow the workflow locally**
 
-- To apply changes:
+  ```sh
+  git checkout -b my-task-branch
 
-```sh
-# Stage and commit
-git add <files...>
-git commit -m "feat: short description"
-# Push the feature branch and open a PR
-git push -u origin <feature-name>
-```
+  git add .
+  git commit -m "Describe what you did."
+  ```
+
+- **push to remote for the first time**
+
+  ```sh
+  git push -u origin my-task-branch
+  ```
+
+- **after that, push usually**
+
+  ```sh
+  git push
+  ```
+
+- **If you want to get updates from main into your branch**
+
+  ```sh
+  # Update your branch with the newest main changes
+  git pull origin main --rebase
+  ```
 
 PR will be reviewed by admin as soon as possible.
+
+---
 
 ## 👤 Maintainer
 
@@ -176,9 +150,13 @@ Feel free to open an issue or discussion for support.
 
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT). See the `LICENSE` file for full details.
 
-## Project Status
+---
+
+## 📈 Project Status
 
 > Status: 🚧 In Development — Not ready for production use.
+
+---
 
 ## 📘 References
 
