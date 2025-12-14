@@ -29,10 +29,7 @@ dependencies = [
   "torchvision",
   "torchinfo",
   "tensorboard",
-] # Add your pip package dependencies here
-
-[project.scripts]
-install-torch = "utils.torch_setup:install_torch_according_to_hardware"
+]
 
 [project.optional-dependencies]
 docs = [
@@ -80,14 +77,13 @@ exclude = '(\.venv|venv|env|\.env|\.mypy_cache|build|dist|_build|data/raw|data/p
 
 
 # -------------------------
-# (formatter)
+# (black)
 # -------------------------
 [tool.black]
 line-length = 100
 target-version = ["py310"]
 include = '\.pyi?$'
 
-# Exclude all temporary, cache, and build folders
 exclude = '''
 /(
     \.git
@@ -112,6 +108,9 @@ exclude = '''
 )/
 '''
 
+# -------------------------
+# ruff
+# -------------------------
 [tool.ruff]
 line-length = 100
 target-version = "py310"
@@ -142,28 +141,31 @@ exclude = [
   "data/processed",
 ]
 
-[tool.ruff.lint.isort]
-known-first-party = ["mlops_playground"]
-
 # -------------------------
-# pytest configuration
+# pytest
 # -------------------------
 [tool.pytest.ini_options]
+pythonpath = ["."]
 minversion = "6.0"
-
 addopts = [
   "-v",
-  "-ra",                # show summary for skipped/xfail
-  "--strict-markers",   # avoid typos in markers
-  "--disable-warnings", # cleaner output unless debugging
+  "-ra",
+  "--strict-markers",
+  "--disable-warnings",
   # "--cov=src",
   # "--cov-report=term-missing",
 ]
 
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-filterwarnings = ["ignore::DeprecationWarning", "ignore::UserWarning"]
-markers = ["slow: slow tests", "integration: integration tests"]
+filterwarnings = [
+  "ignore::DeprecationWarning",
+  "ignore::UserWarning",
+]
+markers = [
+  "slow: slow tests",
+  "integration: integration tests",
+]
 
 # -------------------------
 # Coverage (pytest-cov)
@@ -181,12 +183,9 @@ markers = ["slow: slow tests", "integration: integration tests"]
 # setuptools: package discovery
 # -------------------------
 
-[tool.setuptools]
-package-dir = { "" = "." }
+# [tool.setuptools]
+# package-dir = { "" = "." }
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["src*"]
-
-[tool.pylint.'MASTER']
-init-hook = 'import sys; sys.path.insert(0, "src")'
