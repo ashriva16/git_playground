@@ -33,7 +33,7 @@ jobs:
 
       - name: Generate API docs with sphinx-apidoc
         run: |
-          SOURCEDIR="docs/source"
+          SOURCEDIR="site/source"
           API_PACKAGES="src"
           for pkg in $API_PACKAGES; do
             outdir="${SOURCEDIR}/api/${pkg}"
@@ -46,12 +46,12 @@ jobs:
 
       - name: Build Sphinx HTML
         run: |
-          sphinx-build -b html docs/source docs/_build/html
+          sphinx-build -b html site/source site/_build/html
 
       - name: Upload built site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/_build/html
+          path: site/_build/html
 
   deploy:
     runs-on: ubuntu-latest
