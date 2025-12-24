@@ -29,6 +29,43 @@ Covers reproducible environments, experiment execution, packaging, automation, a
 
 ---
 
+## 🚀 End-User Setup & Usage
+
+- **Use the Makefile to create a .venv and install user-level dependencies.**
+
+    ```bash
+    make env
+    ```
+
+    This creates `.venv/` and installs packages from `requirements.txt` (if present).
+
+- **For refreshing and installing updated dependencies run**
+
+    ```bash
+    git pull        # get latest code + updated requirements.txt
+    make install    # refresh dependencies inside .venv
+    ```
+
+- **To manually install packages or missing dependency in the venv**
+
+    ```sh
+    source .venv/bin/activate
+    pip install <package>
+    ```
+
+- **Clean build/cache files**
+
+    ```sh
+    make clean
+    ```
+
+- **Usage**
+
+    //```sh
+    //.venv/bin/python -m {{ cookiecutter.folder_name }}.main
+    //```
+
+
 ## 👤 Maintainer
 
 **Ankit Shrivastava**
