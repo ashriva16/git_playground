@@ -39,14 +39,14 @@ Covers reproducible environments, experiment execution, packaging, automation, a
 
     This creates `.venv/` and installs packages from `requirements.txt` (if present).
 
-- **For refreshing and installing updated dependencies run**
+- **For refreshing and installing updated dependencies, run**
 
     ```bash
     git pull        # get latest code + updated requirements.txt
     make install    # refresh dependencies inside .venv
     ```
 
-- **To manually install packages or missing dependency in the venv**
+- **To manually install missing packages or dependencies in the venv**
 
     ```sh
     source .venv/bin/activate
@@ -61,9 +61,6 @@ Covers reproducible environments, experiment execution, packaging, automation, a
 
 - **Usage**
 
-    //```sh
-    //.venv/bin/python -m {{ cookiecutter.folder_name }}.main
-    //```
 
 
 ## 👤 Maintainer
